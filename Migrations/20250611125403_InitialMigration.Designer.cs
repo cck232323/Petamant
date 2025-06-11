@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MyDotnetApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250610093519_AddCreatedAtToActivities")]
-    partial class AddCreatedAtToActivities
+    [Migration("20250611125403_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,12 +32,6 @@ namespace MyDotnetApp.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("CreatorId")
-                        .HasColumnType("integer");
 
                     b.Property<int>("CreatorUserId")
                         .HasColumnType("integer");

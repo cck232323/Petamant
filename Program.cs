@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyDotnetApp.Data;
 using MyDotnetApp.Services;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,22 +59,23 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 // 添加其他服务...
 
-// 配置JWT认证
+// JWT 认证配置
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured");
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                builder.Configuration["Jwt:Key"] ?? "defaultSecretKey12345678901234567890"))
+            ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer is not configured"),
+            ValidAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience is not configured"),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            // 设置 NameClaimType 为 ClaimTypes.NameIdentifier
+            NameClaimType = ClaimTypes.NameIdentifier
         };
-        options.MapInboundClaims = false;
     });
 
 // Console.WriteLine($"Database provider: {builder.Services.BuildServiceProvider().GetService<ApplicationDbContext>()?.Database.ProviderName}");
@@ -96,16 +98,15 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// 配置HTTP请求管道
-// if (app.Environment.IsDevelopment())
-// {
-//     app.UseSwagger();
-//     app.UseSwaggerUI();
-// }
-app.UseSwagger();
-app.UseSwaggerUI();
-// app.UseHttpsRedirection();
-app.UseAuthentication();
+// 配置 HTTP 请求管道
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+
+app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthentication(); // 确保这个在 UseAuthorization 之前
 app.UseAuthorization();
 app.MapControllers();
 

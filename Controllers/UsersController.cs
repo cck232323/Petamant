@@ -71,7 +71,19 @@ namespace MyDotnetApp.Controllers
             try
             {
                 // 获取当前登录用户的ID
-                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+                var claimValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(claimValue))
+                {
+                    return Unauthorized("无法识别当前用户");
+                }
+
+                if (!int.TryParse(claimValue, out int currentUserId))
+                {
+                    return BadRequest("用户ID格式无效");
+                }
+
+                // 记录调试信息
+                Console.WriteLine($"请求的用户ID: {id}, 当前用户ID: {currentUserId}");
 
                 // 只允许用户查看自己的资料，或者管理员查看任何用户的资料
                 if (currentUserId != id && !User.IsInRole("Admin"))
@@ -80,11 +92,17 @@ namespace MyDotnetApp.Controllers
                 }
 
                 var user = await _userService.GetUserByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound($"未找到ID为{id}的用户");
+                }
+                
                 return Ok(user);
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                Console.WriteLine($"获取用户资料时出错: {ex.Message}");
+                return StatusCode(500, $"服务器错误: {ex.Message}");
             }
         }
         

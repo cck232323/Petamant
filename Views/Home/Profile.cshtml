@@ -23,7 +23,7 @@
             </div>
         </div>
         
-        <div class="col-md-6">
+        @* <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
                     我的活动
@@ -59,7 +59,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> *@
     </div>
 </div>
 
@@ -76,7 +76,21 @@
             
             // 解析JWT获取用户ID
             var payload = JSON.parse(atob(token.split('.')[1]));
-            var userId = payload.nameid || 0;
+            console.log("JWT payload:", payload);
+            
+            // 尝试所有可能的用户ID字段
+            var userId = parseInt(
+                payload.nameid || 
+                payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || 
+                0
+            );
+            console.log("当前用户ID:", userId);
+            
+            if (userId === 0) {
+                alert("无法获取用户ID，请重新登录");
+                window.location.href = "/Home/Index";
+                return;
+            }
             
             // 加载用户资料
             $.ajax({
@@ -92,8 +106,13 @@
                     `;
                     $("#profileInfo").html(profileHtml);
                 },
-                error: function(error) {
-                    $("#profileInfo").html(`<div class="alert alert-danger">加载用户资料失败</div>`);
+                error: function(xhr) {
+                    console.error("加载用户资料失败:", xhr);
+                    $("#profileInfo").html(`
+                        <div class="alert alert-danger">
+                            加载用户资料失败: ${xhr.status} ${xhr.statusText}
+                        </div>
+                    `);
                 }
             });
             
@@ -119,7 +138,7 @@
                                     <small>${new Date(activity.date).toLocaleDateString()}</small>
                                 </div>
                                 <p class="mb-1">${activity.description.substring(0, 100)}${activity.description.length > 100 ? '...' : ''}</p>
-                                <small>地点: ${activity.location} | 报名人数: ${activity.registrationsCount}</small>
+                                <small>地点: ${activity.location} | 报名人数: ${activity.registrationsCount || 0}</small>
                             </a>
                         `;
                     });
@@ -127,8 +146,13 @@
                     
                     $("#createdActivities").html(activitiesHtml);
                 },
-                error: function(error) {
-                    $("#createdActivities").html(`<div class="alert alert-danger">加载活动失败</div>`);
+                error: function(xhr) {
+                    console.error("加载创建的活动失败:", xhr);
+                    $("#createdActivities").html(`
+                        <div class="alert alert-danger">
+                            加载活动失败: ${xhr.status} ${xhr.statusText}
+                        </div>
+                    `);
                 }
             });
             
@@ -154,7 +178,7 @@
                                     <small>${new Date(activity.date).toLocaleDateString()}</small>
                                 </div>
                                 <p class="mb-1">${activity.description.substring(0, 100)}${activity.description.length > 100 ? '...' : ''}</p>
-                                <small>地点: ${activity.location} | 创建者: ${activity.creatorUserName}</small>
+                                <small>地点: ${activity.location} | 创建者: ${activity.creatorUserName || '未知'}</small>
                             </a>
                         `;
                     });
@@ -162,9 +186,21 @@
                     
                     $("#registeredActivities").html(activitiesHtml);
                 },
-                error: function(error) {
-                    $("#registeredActivities").html(`<div class="alert alert-danger">加载活动失败</div>`);
+                error: function(xhr) {
+                    console.error("加载报名的活动失败:", xhr);
+                    $("#registeredActivities").html(`
+                        <div class="alert alert-danger">
+                            加载活动失败: ${xhr.status} ${xhr.statusText}
+                        </div>
+                    `);
                 }
+            });
+            
+            // 绑定活动点击事件
+            $(document).on("click", ".list-group-item", function() {
+                var activityId = $(this).data("id");
+                // 这里可以添加查看活动详情的逻辑
+                console.log("点击活动ID:", activityId);
             });
         });
     </script>

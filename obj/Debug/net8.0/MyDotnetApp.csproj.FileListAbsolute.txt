@@ -1,4 +1,5 @@
 /Users/kim/Downloads/MyDotnetApp/bin/Debug/net8.0/appsettings.json
+/Users/kim/Downloads/MyDotnetApp/bin/Debug/net8.0/MyDotnetApp.staticwebassets.runtime.json
 /Users/kim/Downloads/MyDotnetApp/bin/Debug/net8.0/MyDotnetApp.staticwebassets.endpoints.json
 /Users/kim/Downloads/MyDotnetApp/bin/Debug/net8.0/MyDotnetApp
 /Users/kim/Downloads/MyDotnetApp/bin/Debug/net8.0/MyDotnetApp.deps.json
@@ -106,6 +107,7 @@
 /Users/kim/Downloads/MyDotnetApp/obj/Debug/net8.0/MyDotnetApp.MvcApplicationPartsAssemblyInfo.cache
 /Users/kim/Downloads/MyDotnetApp/obj/Debug/net8.0/MyDotnetApp.RazorAssemblyInfo.cache
 /Users/kim/Downloads/MyDotnetApp/obj/Debug/net8.0/MyDotnetApp.RazorAssemblyInfo.cs
+/Users/kim/Downloads/MyDotnetApp/obj/Debug/net8.0/MyDotnetApp.sourcelink.json
 /Users/kim/Downloads/MyDotnetApp/obj/Debug/net8.0/scopedcss/bundle/MyDotnetApp.styles.css
 /Users/kim/Downloads/MyDotnetApp/obj/Debug/net8.0/staticwebassets.build.json
 /Users/kim/Downloads/MyDotnetApp/obj/Debug/net8.0/staticwebassets.build.json.cache

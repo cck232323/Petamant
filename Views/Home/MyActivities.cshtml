@@ -16,9 +16,9 @@
     
     <div class="tab-content mt-3" id="myTabContent">
         <div class="tab-pane fade show active" id="created" role="tabpanel">
-            <div class="mb-3">
+            @* <div class="mb-3">
                 <a href="#" class="btn btn-primary" id="createActivityBtn" data-toggle="modal" data-target="#createActivityModal">创建新活动</a>
-            </div>
+            </div> *@
             <div id="createdActivities">
                 <div class="text-center">
                     <div class="spinner-border" role="status">
@@ -133,7 +133,7 @@
             loadRegisteredActivities();
             
             // 创建新活动
-            $("#submitActivityBtn").click(function() {
+            @* $("#submitActivityBtn").click(function() {
                 var title = $("#activityTitle").val();
                 var description = $("#activityDescription").val();
                 var date = $("#activityDate").val();
@@ -167,7 +167,7 @@
                         alert("创建活动失败: " + (xhr.responseJSON ? xhr.responseJSON.message : xhr.responseText));
                     }
                 });
-            });
+            }); *@
             
             // 查看活动详情
             $(document).on("click", ".activity-item", function() {
