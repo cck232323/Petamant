@@ -1,0 +1,494 @@
+@* @model IEnumerable&lt;MyDotnetApp.Models.Activity&gt;
+
+@{
+    ViewData["Title"] = "活动列表";
+}
+
+&lt;h1&gt;宠物活动列表&lt;/h1&gt;
+
+&lt;p&gt;
+    &lt;a href=&quot;#&quot; class=&quot;btn btn-primary&quot; id=&quot;createActivityBtn&quot; data-toggle=&quot;modal&quot; data-target=&quot;#createActivityModal&quot;&gt;创建新活动&lt;/a&gt;
+&lt;/p&gt;
+
+&lt;div class=&quot;row&quot;&gt;
+    @foreach (var activity in Model)
+    {
+        &lt;div class=&quot;col-md-4 mb-4&quot;&gt;
+            &lt;div class=&quot;card&quot;&gt;
+                &lt;div class=&quot;card-body&quot;&gt;
+                    &lt;h5 class=&quot;card-title&quot;&gt;@activity.Title&lt;/h5&gt;
+                    &lt;h6 class=&quot;card-subtitle mb-2 text-muted&quot;&gt;@activity.Date.ToString(&quot;yyyy-MM-dd HH:mm&quot;)&lt;/h6&gt;
+                    &lt;p class=&quot;card-text&quot;&gt;@activity.Description&lt;/p&gt;
+                    &lt;p class=&quot;card-text&quot;&gt;&lt;small class=&quot;text-muted&quot;&gt;地点: @activity.Location&lt;/small&gt;&lt;/p&gt;
+                    &lt;a href=&quot;#&quot; class=&quot;btn btn-sm btn-info activityDetailsBtn&quot; data-id=&quot;@activity.Id&quot; data-toggle=&quot;modal&quot; data-target=&quot;#activityDetailsModal&quot;&gt;查看详情&lt;/a&gt;
+                    &lt;a href=&quot;#&quot; class=&quot;btn btn-sm btn-success registerBtn&quot; data-id=&quot;@activity.Id&quot;&gt;报名参加&lt;/a&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    }
+&lt;/div&gt;
+
+&lt;!-- 创建活动模态框 --&gt;
+&lt;div class=&quot;modal fade&quot; id=&quot;createActivityModal&quot; tabindex=&quot;-1&quot; role=&quot;dialog&quot; aria-labelledby=&quot;createActivityModalLabel&quot; aria-hidden=&quot;true&quot;&gt;
+    &lt;div class=&quot;modal-dialog&quot; role=&quot;document&quot;&gt;
+        &lt;div class=&quot;modal-content&quot;&gt;
+            &lt;div class=&quot;modal-header&quot;&gt;
+                &lt;h5 class=&quot;modal-title&quot; id=&quot;createActivityModalLabel&quot;&gt;创建新活动&lt;/h5&gt;
+                &lt;button type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;modal&quot; aria-label=&quot;Close&quot;&gt;
+                    &lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;
+                &lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;modal-body&quot;&gt;
+                &lt;form id=&quot;createActivityForm&quot;&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;activityTitle&quot;&gt;活动标题&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; class=&quot;form-control&quot; id=&quot;activityTitle&quot; required&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;activityDescription&quot;&gt;活动描述&lt;/label&gt;
+                        &lt;textarea class=&quot;form-control&quot; id=&quot;activityDescription&quot; rows=&quot;3&quot; required&gt;&lt;/textarea&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;activityDate&quot;&gt;活动日期&lt;/label&gt;
+                        &lt;input type=&quot;datetime-local&quot; class=&quot;form-control&quot; id=&quot;activityDate&quot; required&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;activityLocation&quot;&gt;活动地点&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; class=&quot;form-control&quot; id=&quot;activityLocation&quot; required&gt;
+                    &lt;/div&gt;
+                &lt;/form&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;modal-footer&quot;&gt;
+                &lt;button type=&quot;button&quot; class=&quot;btn btn-secondary&quot; data-dismiss=&quot;modal&quot;&gt;取消&lt;/button&gt;
+                &lt;button type=&quot;button&quot; class=&quot;btn btn-primary&quot; id=&quot;submitActivityBtn&quot;&gt;创建&lt;/button&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- 活动详情模态框 --&gt;
+&lt;div class=&quot;modal fade&quot; id=&quot;activityDetailsModal&quot; tabindex=&quot;-1&quot; role=&quot;dialog&quot; aria-labelledby=&quot;activityDetailsModalLabel&quot; aria-hidden=&quot;true&quot;&gt;
+    &lt;div class=&quot;modal-dialog modal-lg&quot; role=&quot;document&quot;&gt;
+        &lt;div class=&quot;modal-content&quot;&gt;
+            &lt;div class=&quot;modal-header&quot;&gt;
+                &lt;h5 class=&quot;modal-title&quot; id=&quot;activityDetailsModalLabel&quot;&gt;活动详情&lt;/h5&gt;
+                &lt;button type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;modal&quot; aria-label=&quot;Close&quot;&gt;
+                    &lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;
+                &lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;modal-body&quot; id=&quot;activityDetailsContent&quot;&gt;
+                &lt;!-- 活动详情将通过AJAX加载 --&gt;
+                &lt;div class=&quot;text-center&quot;&gt;
+                    &lt;div class=&quot;spinner-border&quot; role=&quot;status&quot;&gt;
+                        &lt;span class=&quot;sr-only&quot;&gt;加载中...&lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;modal-footer&quot;&gt;
+                &lt;button type=&quot;button&quot; class=&quot;btn btn-secondary&quot; data-dismiss=&quot;modal&quot;&gt;关闭&lt;/button&gt;
+                &lt;button type=&quot;button&quot; class=&quot;btn btn-success&quot; id=&quot;modalRegisterBtn&quot;&gt;报名参加&lt;/button&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+@section Scripts {
+    &lt;script&gt;
+        $(document).ready(function() {
+            // 检查是否已登录
+            var token = localStorage.getItem(&quot;token&quot;);
+            if (!token) {
+                alert(&quot;请先登录！&quot;);
+                window.location.href = &quot;/Home/Index&quot;;
+                return;
+            }
+            
+            // 解析JWT获取用户ID
+            var payload = JSON.parse(atob(token.split(&#39;.&#39;)[1]));
+            console.log(&quot;JWT payload:&quot;, payload);
+
+            // 尝试所有可能的用户ID字段
+            var userId = parseInt(
+                payload.nameid || 
+                payload[&quot;http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier&quot;] || 
+                0
+            );
+            console.log(&quot;解析后的用户ID:&quot;, userId);
+
+            // 查看活动详情
+            $(“.activityDetailsBtn”).click(function(e) {
+                e.preventDefault();
+                var activityId = $(this).data(&quot;id&quot;);
+                
+                // 设置模态框中的报名按钮数据
+                $(“#modalRegisterBtn”).data(&quot;id&quot;, activityId);
+                
+                // 加载活动详情
+                $.ajax({
+                    url: `/api/activities/${activityId}`,
+                    type: &quot;GET&quot;,
+                    headers: {
+                        &quot;Authorization&quot;: &quot;Bearer &quot; + token
+                    },
+                    success: function(activity) {
+                        var detailsHtml = `
+                            &lt;h3&gt;${activity.title}&lt;/h3&gt;
+                            &lt;p class=&quot;text-muted&quot;&gt;创建者: ${activity.creatorUserName}&lt;/p&gt;
+                            &lt;p&gt;&lt;strong&gt;日期:&lt;/strong&gt; ${new Date(activity.date).toLocaleString()}&lt;/p&gt;
+                            &lt;p&gt;&lt;strong&gt;地点:&lt;/strong&gt; ${activity.location}&lt;/p&gt;
+                            &lt;p&gt;&lt;strong&gt;描述:&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p&gt;${activity.description}&lt;/p&gt;
+                            &lt;p&gt;&lt;strong&gt;已报名人数:&lt;/strong&gt; ${activity.registrationsCount}&lt;/p&gt;
+                            &lt;hr&gt;
+                            &lt;h5&gt;报名参加&lt;/h5&gt;
+                            &lt;div class=&quot;form-group&quot;&gt;
+                                &lt;label for=&quot;petInfo&quot;&gt;宠物信息&lt;/label&gt;
+                                &lt;textarea class=&quot;form-control&quot; id=&quot;petInfo&quot; rows=&quot;2&quot; placeholder=&quot;请描述您的宠物信息（品种、年龄等）&quot;&gt;&lt;/textarea&gt;
+                            &lt;/div&gt;
+                        `;
+                        
+                        $(“#activityDetailsContent”).html(detailsHtml);
+                    },
+                    error: function(error) {
+                        $(“#activityDetailsContent”).html(`&lt;div class=&quot;alert alert-danger&quot;&gt;加载活动详情失败: ${error.responseText}&lt;/div&gt;`);
+                    }
+                });
+            });
+
+            // 模态框中的报名按钮
+            $(“#modalRegisterBtn”).click(function() {
+                var activityId = $(this).data(&quot;id&quot;);
+                var petInfo = $(“#petInfo”).val();
+                
+                if (!petInfo) {
+                    alert(&quot;请输入宠物信息&quot;);
+                    return;
+                }
+                
+                registerForActivity(activityId, petInfo);
+            });
+
+            // 报名参加活动
+            $(“.registerBtn”).click(function(e) {
+                e.preventDefault();
+                var activityId = $(this).data(&quot;id&quot;);
+                
+                // 弹出模态框收集宠物信息
+                var petInfo = prompt(&quot;请输入您的宠物信息:&quot;, &quot;&quot;);
+                if (petInfo) {
+                    registerForActivity(activityId, petInfo);
+                }
+            });
+            
+            // 报名活动的通用函数
+            function registerForActivity(activityId, petInfo) {
+                $.ajax({
+                    url: &quot;/api/registrations&quot;,
+                    type: &quot;POST&quot;,
+                    headers: {
+                        &quot;Authorization&quot;: &quot;Bearer &quot; + token
+                    },
+                    contentType: &quot;application/json&quot;,
+                    data: JSON.stringify({
+                        activityId: activityId,
+                        petInfo: petInfo
+                    }),
+                    success: function(response) {
+                        alert(&quot;报名成功！&quot;);
+                        $(“#activityDetailsModal”).modal(&quot;hide&quot;);
+                    },
+                    error: function(xhr) {
+                        alert(&quot;报名失败: &quot; + (xhr.responseJSON ? xhr.responseJSON.message : xhr.responseText));
+                    }
+                });
+            }
+
+            // 创建新活动
+            $(“#submitActivityBtn”).click(function() {
+                var title = $(“#activityTitle”).val();
+                var description = $(“#activityDescription”).val();
+                var date = $(“#activityDate”).val(); // 这是 HTML datetime-local 输入的值
+                var location = $(“#activityLocation”).val();
+                
+                if (!title || !description || !date || !location) {
+                    alert(&quot;请填写所有必填字段&quot;);
+                    return;
+                }
+                
+                // 确保日期格式正确
+                var formattedDate = new Date(date).toISOString();
+                
+                $.ajax({
+                    url: &quot;/api/activities&quot;,
+                    type: &quot;POST&quot;,
+                    headers: {
+                        &quot;Authorization&quot;: &quot;Bearer &quot; + token
+                    },
+                    contentType: &quot;application/json&quot;,
+                    data: JSON.stringify({
+                        title: title,
+                        description: description,
+                        date: formattedDate, // 使用 ISO 格式的日期
+                        location: location
+                    }),
+                    success: function(response) {
+                        alert(&quot;活动创建成功！&quot;);
+                        $(“#createActivityModal”).modal(&quot;hide&quot;);
+                        // 刷新页面显示新活动
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert(&quot;创建活动失败: &quot; + (xhr.responseJSON ? xhr.responseJSON.message : xhr.responseText));
+                    }
+                });
+            });
+        });
+    &lt;/script&gt; *@
+
+
+@model IEnumerable<MyDotnetApp.Models.Activity>
+
+@{
+    ViewData["Title"] = "活动列表";
+}
+<h1>宠物活动列表</h1>
+
+<p>
+    <a href="#" class="btn btn-primary" id="createActivityBtn" data-toggle="modal" data-target="#createActivityModal">创建新活动</a>
+</p>
+
+<div class="row">
+    @foreach (var activity in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@activity.Title</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">@activity.Date.ToString("yyyy-MM-dd HH:mm")</h6>
+                    <p class="card-text">@activity.Description</p>
+                    <p class="card-text"><small class="text-muted">地点: @activity.Location</small></p>
+                    <a href="#" class="btn btn-sm btn-info activityDetailsBtn" data-id="@activity.Id" data-toggle="modal" data-target="#activityDetailsModal">查看详情</a>
+                    <a href="#" class="btn btn-sm btn-success registerBtn" data-id="@activity.Id">报名参加</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- 创建活动模态框 -->
+<div class="modal fade" id="createActivityModal" tabindex="-1" role="dialog" aria-labelledby="createActivityModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createActivityModalLabel">创建新活动</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createActivityForm">
+                    <div class="form-group">
+                        <label for="activityTitle">活动标题</label>
+                        <input type="text" class="form-control" id="activityTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityDescription">活动描述</label>
+                        <textarea class="form-control" id="activityDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityDate">活动日期</label>
+                        <input type="datetime-local" class="form-control" id="activityDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityLocation">活动地点</label>
+                        <input type="text" class="form-control" id="activityLocation" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="submitActivityBtn">创建</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 活动详情模态框 -->
+<div class="modal fade" id="activityDetailsModal" tabindex="-1" role="dialog" aria-labelledby="activityDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="activityDetailsModalLabel">活动详情</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="activityDetailsContent">
+                <!-- 活动详情将通过AJAX加载 -->
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">加载中...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-success" id="modalRegisterBtn">报名参加</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // 检查是否已登录
+            var token = localStorage.getItem("token");
+            if (!token) {
+                alert("请先登录！");
+                window.location.href = "/Home/Index";
+                return;
+            }
+            
+            // 解析JWT获取用户ID
+            var payload = JSON.parse(atob(token.split('.')[1]));
+            console.log("JWT payload:", payload);
+
+            // 尝试所有可能的用户ID字段
+            var userId = parseInt(
+                payload.nameid || 
+                payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || 
+                0
+            );
+            console.log("解析后的用户ID:", userId);
+
+            // 查看活动详情
+            $(".activityDetailsBtn").click(function(e) {
+                e.preventDefault();
+                var activityId = $(this).data("id");
+                
+                // 设置模态框中的报名按钮数据
+                $("#modalRegisterBtn").data("id", activityId);
+                
+                // 加载活动详情
+                $.ajax({
+                    url: `/api/activities/${activityId}`,
+                    type: "GET",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    success: function(activity) {
+                        var detailsHtml = `
+                            <h3>${activity.title}</h3>
+                            <p class="text-muted">创建者: ${activity.creatorUserName}</p>
+                            <p><strong>日期:</strong> ${new Date(activity.date).toLocaleString()}</p>
+                            <p><strong>地点:</strong> ${activity.location}</p>
+                            <p><strong>描述:</strong></p>
+                            <p>${activity.description}</p>
+                            <p><strong>已报名人数:</strong> ${activity.registrationsCount}</p>
+                            <hr>
+                            <h5>报名参加</h5>
+                            <div class="form-group">
+                                <label for="petInfo">宠物信息</label>
+                                <textarea class="form-control" id="petInfo" rows="2" placeholder="请描述您的宠物信息（品种、年龄等）"></textarea>
+                            </div>
+                        `;
+                        
+                        $("#activityDetailsContent").html(detailsHtml);
+                    },
+                    error: function(error) {
+                        $("#activityDetailsContent").html(`<div class="alert alert-danger">加载活动详情失败: ${error.responseText}</div>`);
+                    }
+                });
+            });
+
+            // 模态框中的报名按钮
+            $("#modalRegisterBtn").click(function() {
+                var activityId = $(this).data("id");
+                var petInfo = $("#petInfo").val();
+                
+                if (!petInfo) {
+                    alert("请输入宠物信息");
+                    return;
+                }
+                
+                registerForActivity(activityId, petInfo);
+            });
+
+            // 报名参加活动
+            $(".registerBtn").click(function(e) {
+                e.preventDefault();
+                var activityId = $(this).data("id");
+                
+                // 弹出模态框收集宠物信息
+                var petInfo = prompt("请输入您的宠物信息:", "");
+                if (petInfo) {
+                    registerForActivity(activityId, petInfo);
+                }
+            });
+            
+            // 报名活动的通用函数
+            function registerForActivity(activityId, petInfo) {
+                $.ajax({
+                    url: "/api/registrations",
+                    type: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        activityId: activityId,
+                        petInfo: petInfo
+                    }),
+                    success: function(response) {
+                        alert("报名成功！");
+                        $("#activityDetailsModal").modal("hide");
+                    },
+                    error: function(xhr) {
+                        alert("报名失败: " + (xhr.responseJSON ? xhr.responseJSON.message : xhr.responseText));
+                    }
+                });
+            }
+
+            // 创建新活动
+            $("#submitActivityBtn").click(function() {
+                var title = $("#activityTitle").val();
+                var description = $("#activityDescription").val();
+                var date = $("#activityDate").val(); // 这是 HTML datetime-local 输入的值
+                var location = $("#activityLocation").val();
+                
+                if (!title || !description || !date || !location) {
+                    alert("请填写所有必填字段");
+                    return;
+                }
+                
+                // 确保日期格式正确
+                var formattedDate = new Date(date).toISOString();
+                
+                $.ajax({
+                    url: "/api/activities",
+                    type: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        title: title,
+                        description: description,
+                        date: formattedDate, // 使用 ISO 格式的日期
+                        location: location
+                    }),
+                    success: function(response) {
+                        alert("活动创建成功！");
+                        $("#createActivityModal").modal("hide");
+                        // 刷新页面显示新活动
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert("创建活动失败: " + (xhr.responseJSON ? xhr.responseJSON.message : xhr.responseText));
+                    }
+                });
+            });
+        });
+    </script>
+}

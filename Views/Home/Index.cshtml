@@ -1,0 +1,103 @@
+@{
+    ViewData["Title"] = "宠物活动聚合社交平台";
+}
+
+<div class="text-center">
+    <h1 class="display-4">欢迎来到宠物活动聚合社交平台</h1>
+    <p>在这里，您可以发现和参与各种宠物相关的活动。</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <h2>用户登录</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">邮箱</label>
+                <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">登录</button>
+        </form>
+    </div>
+    <div class="col-md-6">
+        <h2>新用户注册</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="registerEmail">邮箱</label>
+                <input type="email" class="form-control" id="registerEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" class="form-control" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">密码</label>
+                <input type="password" class="form-control" id="registerPassword" required>
+            </div>
+            <button type="submit" class="btn btn-success">注册</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // 登录表单提交
+            $("#loginForm").submit(function(e) {
+                e.preventDefault();
+                
+                var email = $("#email").val();
+                var password = $("#password").val();
+                
+                $.ajax({
+                    url: "/api/users/login",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        userName: email, // 添加userName字段，可以使用email值
+                        email: email,
+                        password: password
+                    }),
+                    success: function(response) {
+                        // 保存token到localStorage
+                        localStorage.setItem("token", response.token);
+                        // 重定向到活动页面
+                        window.location.href = "/Home/Activities";
+                    },
+                    error: function(xhr) {
+                        alert("登录失败: " + (xhr.responseJSON ? xhr.responseJSON.message : xhr.responseText));
+                    }
+                });
+            });
+            
+            // 注册表单提交
+            $("#registerForm").submit(function(e) {
+                e.preventDefault();
+                
+                var registerData = {
+                    email: $("#registerEmail").val(),
+                    userName: $("#username").val(),
+                    password: $("#registerPassword").val()
+                };
+                
+                $.ajax({
+                    url: "/api/users/register",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(registerData),
+                    success: function(response) {
+                        alert("注册成功！请登录。");
+                        $("#email").val($("#registerEmail").val());
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("注册错误:", xhr.responseText);
+                        alert("注册失败：" + (xhr.responseJSON ? xhr.responseJSON.message : "请检查输入信息"));
+                    }
+                });
+            });
+        });
+    </script>
+}

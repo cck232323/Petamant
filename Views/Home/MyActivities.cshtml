@@ -1,0 +1,327 @@
+@{
+    ViewData["Title"] = "我的活动";
+}
+
+<div class="container">
+    <h1>我的活动</h1>
+    
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="created-tab" data-toggle="tab" href="#created" role="tab">我创建的活动</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="registered-tab" data-toggle="tab" href="#registered" role="tab">我报名的活动</a>
+        </li>
+    </ul>
+    
+    <div class="tab-content mt-3" id="myTabContent">
+        <div class="tab-pane fade show active" id="created" role="tabpanel">
+            <div class="mb-3">
+                <a href="#" class="btn btn-primary" id="createActivityBtn" data-toggle="modal" data-target="#createActivityModal">创建新活动</a>
+            </div>
+            <div id="createdActivities">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">加载中...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="registered" role="tabpanel">
+            <div id="registeredActivities">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">加载中...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 创建活动模态框 -->
+<div class="modal fade" id="createActivityModal" tabindex="-1" role="dialog" aria-labelledby="createActivityModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createActivityModalLabel">创建新活动</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createActivityForm">
+                    <div class="form-group">
+                        <label for="activityTitle">活动标题</label>
+                        <input type="text" class="form-control" id="activityTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityDescription">活动描述</label>
+                        <textarea class="form-control" id="activityDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityDate">活动日期</label>
+                        <input type="datetime-local" class="form-control" id="activityDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityLocation">活动地点</label>
+                        <input type="text" class="form-control" id="activityLocation" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="submitActivityBtn">创建</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 活动详情模态框 -->
+<div class="modal fade" id="activityDetailsModal" tabindex="-1" role="dialog" aria-labelledby="activityDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="activityDetailsModalLabel">活动详情</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="activityDetailsContent">
+                <!-- 活动详情将通过AJAX加载 -->
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">加载中...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-danger" id="deleteActivityBtn" style="display:none;">删除活动</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // 检查是否已登录
+            var token = localStorage.getItem("token");
+            if (!token) {
+                alert("请先登录！");
+                window.location.href = "/Home/Index";
+                return;
+            }
+            
+            // 解析JWT获取用户ID
+            var payload = JSON.parse(atob(token.split('.')[1]));
+            console.log("JWT payload:", payload);
+
+            // 尝试所有可能的用户ID字段
+            var userId = parseInt(
+                payload.nameid || 
+                payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || 
+                0
+            );
+            console.log("当前用户ID:", userId);
+            
+            // 加载用户创建的活动
+            loadCreatedActivities();
+            
+            // 加载用户报名的活动
+            loadRegisteredActivities();
+            
+            // 创建新活动
+            $("#submitActivityBtn").click(function() {
+                var title = $("#activityTitle").val();
+                var description = $("#activityDescription").val();
+                var date = $("#activityDate").val();
+                var location = $("#activityLocation").val();
+                
+                if (!title || !description || !date || !location) {
+                    alert("请填写所有必填字段");
+                    return;
+                }
+                
+                $.ajax({
+                    url: "/api/activities",
+                    type: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        title: title,
+                        description: description,
+                        date: date,
+                        location: location
+                    }),
+                    success: function(response) {
+                        alert("活动创建成功！");
+                        $("#createActivityModal").modal("hide");
+                        // 重新加载创建的活动列表
+                        loadCreatedActivities();
+                    },
+                    error: function(xhr) {
+                        alert("创建活动失败: " + (xhr.responseJSON ? xhr.responseJSON.message : xhr.responseText));
+                    }
+                });
+            });
+            
+            // 查看活动详情
+            $(document).on("click", ".activity-item", function() {
+                var activityId = $(this).data("id");
+                var isCreator = $(this).data("creator") === true;
+                
+                // 显示或隐藏删除按钮
+                $("#deleteActivityBtn").toggle(isCreator);
+                $("#deleteActivityBtn").data("id", activityId);
+                
+                // 加载活动详情
+                $.ajax({
+                    url: `/api/activities/${activityId}`,
+                    type: "GET",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    success: function(activity) {
+                        var registrationsHtml = "";
+                        if (activity.registrations && activity.registrations.length > 0) {
+                            registrationsHtml = `
+                                <h5 class="mt-4">已报名用户 (${activity.registrations.length})</h5>
+                                <ul class="list-group">
+                            `;
+                            activity.registrations.forEach(function(reg) {
+                                registrationsHtml += `
+                                    <li class="list-group-item">
+                                        <strong>${reg.userName}</strong>
+                                        <p><small>宠物信息: ${reg.petInfo}</small></p>
+                                    </li>
+                                `;
+                            });
+                            registrationsHtml += "</ul>";
+                        } else {
+                            registrationsHtml = "<p>暂无人报名</p>";
+                        }
+                        
+                        var detailsHtml = `
+                            <h3>${activity.title}</h3>
+                            <p class="text-muted">创建者: ${activity.creatorUserName}</p>
+                            <p><strong>日期:</strong> ${new Date(activity.date).toLocaleString()}</p>
+                            <p><strong>地点:</strong> ${activity.location}</p>
+                            <p><strong>描述:</strong></p>
+                            <p>${activity.description}</p>
+                            <hr>
+                            ${registrationsHtml}
+                        `;
+                        
+                        $("#activityDetailsContent").html(detailsHtml);
+                        $("#activityDetailsModal").modal("show");
+                    },
+                    error: function(error) {
+                        alert("加载活动详情失败");
+                    }
+                });
+            });
+            
+            // 删除活动
+            $("#deleteActivityBtn").click(function() {
+                if (confirm("确定要删除这个活动吗？此操作不可撤销。")) {
+                    var activityId = $(this).data("id");
+                    
+                    $.ajax({
+                        url: `/api/activities/${activityId}`,
+                        type: "DELETE",
+                        headers: {
+                            "Authorization": "Bearer " + token
+                        },
+                        success: function() {
+                            alert("活动已成功删除");
+                            $("#activityDetailsModal").modal("hide");
+                            // 重新加载创建的活动列表
+                            loadCreatedActivities();
+                        },
+                        error: function(xhr) {
+                            alert("删除活动失败: " + (xhr.responseJSON ? xhr.responseJSON.message : xhr.responseText));
+                        }
+                    });
+                }
+            });
+            
+            // 加载用户创建的活动
+            function loadCreatedActivities() {
+                $.ajax({
+                    url: `/api/activities/user/${userId}/created`,
+                    type: "GET",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    success: function(activities) {
+                        if (activities.length === 0) {
+                            $("#createdActivities").html("<p>您还没有创建任何活动</p>");
+                            return;
+                        }
+                        
+                        var activitiesHtml = "<div class='list-group'>";
+                        activities.forEach(function(activity) {
+                            activitiesHtml += `
+                                <a href="#" class="list-group-item list-group-item-action activity-item" data-id="${activity.id}" data-creator="true">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">${activity.title}</h5>
+                                        <small>${new Date(activity.date).toLocaleDateString()}</small>
+                                    </div>
+                                    <p class="mb-1">${activity.description.substring(0, 100)}${activity.description.length > 100 ? '...' : ''}</p>
+                                    <small>地点: ${activity.location} | 报名人数: ${activity.registrationsCount}</small>
+                                </a>
+                            `;
+                        });
+                        activitiesHtml += "</div>";
+                        
+                        $("#createdActivities").html(activitiesHtml);
+                    },
+                    error: function(error) {
+                        $("#createdActivities").html(`<div class="alert alert-danger">加载活动失败</div>`);
+                    }
+                });
+            }
+            
+        
+            function loadRegisteredActivities() {
+                $.ajax({
+                    url: `/api/activities/user/${userId}/registered`,
+                    type: "GET",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    success: function(activities) {
+                        if (activities.length === 0) {
+                            $("#registeredActivities").html("<p>您还没有报名任何活动</p>");
+                            return;
+                        }
+                        
+                        var activitiesHtml = "<div class='list-group'>";
+                        activities.forEach(function(activity) {
+                            activitiesHtml += `
+                                <a href="#" class="list-group-item list-group-item-action activity-item" data-id="${activity.id}" data-creator="false">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">${activity.title}</h5>
+                                        <small>${new Date(activity.date).toLocaleDateString()}</small>
+                                    </div>
+                                    <p class="mb-1">${activity.description.substring(0, 100)}${activity.description.length > 100 ? '...' : ''}</p>
+                                    <small>地点: ${activity.location} | 创建者: ${activity.creatorUserName}</small>
+                                </a>
+                            `;
+                        });
+                        activitiesHtml += "</div>";
+                        
+                        $("#registeredActivities").html(activitiesHtml);
+                    },
+                    error: function(error) {
+                        $("#registeredActivities").html(`<div class="alert alert-danger">加载活动失败</div>`);
+                    }
+                });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,171 @@
+@{
+    ViewData["Title"] = "个人资料";
+}
+
+<div class="container">
+    <h1>个人资料</h1>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    基本信息
+                </div>
+                <div class="card-body">
+                    <div id="profileInfo">
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="sr-only">加载中...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    我的活动
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="created-tab" data-toggle="tab" href="#created" role="tab">我创建的</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="registered-tab" data-toggle="tab" href="#registered" role="tab">我报名的</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3" id="myTabContent">
+                        <div class="tab-pane fade show active" id="created" role="tabpanel">
+                            <div id="createdActivities">
+                                <div class="text-center">
+                                    <div class="spinner-border" role="status">
+                                        <span class="sr-only">加载中...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="registered" role="tabpanel">
+                            <div id="registeredActivities">
+                                <div class="text-center">
+                                    <div class="spinner-border" role="status">
+                                        <span class="sr-only">加载中...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // 检查是否已登录
+            var token = localStorage.getItem("token");
+            if (!token) {
+                alert("请先登录！");
+                window.location.href = "/Home/Index";
+                return;
+            }
+            
+            // 解析JWT获取用户ID
+            var payload = JSON.parse(atob(token.split('.')[1]));
+            var userId = payload.nameid || 0;
+            
+            // 加载用户资料
+            $.ajax({
+                url: `/api/users/${userId}`,
+                type: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token
+                },
+                success: function(user) {
+                    var profileHtml = `
+                        <h4>${user.userName}</h4>
+                        <p><strong>邮箱:</strong> ${user.email}</p>
+                    `;
+                    $("#profileInfo").html(profileHtml);
+                },
+                error: function(error) {
+                    $("#profileInfo").html(`<div class="alert alert-danger">加载用户资料失败</div>`);
+                }
+            });
+            
+            // 加载用户创建的活动
+            $.ajax({
+                url: `/api/activities/user/${userId}/created`,
+                type: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token
+                },
+                success: function(activities) {
+                    if (activities.length === 0) {
+                        $("#createdActivities").html("<p>您还没有创建任何活动</p>");
+                        return;
+                    }
+                    
+                    var activitiesHtml = "<div class='list-group'>";
+                    activities.forEach(function(activity) {
+                        activitiesHtml += `
+                            <a href="#" class="list-group-item list-group-item-action" data-id="${activity.id}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">${activity.title}</h5>
+                                    <small>${new Date(activity.date).toLocaleDateString()}</small>
+                                </div>
+                                <p class="mb-1">${activity.description.substring(0, 100)}${activity.description.length > 100 ? '...' : ''}</p>
+                                <small>地点: ${activity.location} | 报名人数: ${activity.registrationsCount}</small>
+                            </a>
+                        `;
+                    });
+                    activitiesHtml += "</div>";
+                    
+                    $("#createdActivities").html(activitiesHtml);
+                },
+                error: function(error) {
+                    $("#createdActivities").html(`<div class="alert alert-danger">加载活动失败</div>`);
+                }
+            });
+            
+            // 加载用户报名的活动
+            $.ajax({
+                url: `/api/activities/user/${userId}/registered`,
+                type: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token
+                },
+                success: function(activities) {
+                    if (activities.length === 0) {
+                        $("#registeredActivities").html("<p>您还没有报名任何活动</p>");
+                        return;
+                    }
+                    
+                    var activitiesHtml = "<div class='list-group'>";
+                    activities.forEach(function(activity) {
+                        activitiesHtml += `
+                            <a href="#" class="list-group-item list-group-item-action" data-id="${activity.id}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">${activity.title}</h5>
+                                    <small>${new Date(activity.date).toLocaleDateString()}</small>
+                                </div>
+                                <p class="mb-1">${activity.description.substring(0, 100)}${activity.description.length > 100 ? '...' : ''}</p>
+                                <small>地点: ${activity.location} | 创建者: ${activity.creatorUserName}</small>
+                            </a>
+                        `;
+                    });
+                    activitiesHtml += "</div>";
+                    
+                    $("#registeredActivities").html(activitiesHtml);
+                },
+                error: function(error) {
+                    $("#registeredActivities").html(`<div class="alert alert-danger">加载活动失败</div>`);
+                }
+            });
+        });
+    </script>
+}
