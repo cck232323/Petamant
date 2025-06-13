@@ -57,9 +57,9 @@
                     type: "POST",
                     contentType: "application/json",
                     data: JSON.stringify({
-                        userName: email, // 添加userName字段，可以使用email值
                         email: email,
                         password: password
+                        // UserName 是可选的，所以可以不包含
                     }),
                     success: function(response) {
                         // 保存token到localStorage
@@ -68,6 +68,7 @@
                         window.location.href = "/Home/Activities";
                     },
                     error: function(xhr) {
+                        console.error("登录错误:", xhr.responseText);
                         alert("登录失败: " + (xhr.responseJSON ? xhr.responseJSON.message : xhr.responseText));
                     }
                 });
@@ -78,8 +79,8 @@
                 e.preventDefault();
                 
                 var registerData = {
-                    email: $("#registerEmail").val(),
                     userName: $("#username").val(),
+                    email: $("#registerEmail").val(),
                     password: $("#registerPassword").val()
                 };
                 

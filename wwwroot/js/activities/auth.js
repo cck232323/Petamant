@@ -25,7 +25,7 @@ const Auth = {
             console.log("JWT payload in getUserId:", payload);
             
             // 尝试所有可能的用户ID字段，确保转换为整数
-            // let userId = 0;
+            let userId = 0;  // 取消注释这行
             
             // 检查标准声明
             if (payload.nameid) {
@@ -34,6 +34,10 @@ const Auth = {
             // 检查XML命名空间声明
             else if (payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]) {
                 userId = parseInt(payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]);
+            }
+            // 检查sub字段（常用于JWT中存储用户ID）
+            else if (payload.sub) {
+                userId = parseInt(payload.sub);
             }
             
             console.log("解析出的用户ID:", userId);
@@ -61,5 +65,31 @@ const Auth = {
             console.error("解析JWT失败:", e);
             return "";
         }
+    },
+
+    // 添加到 Auth 对象中
+    isTokenExpired: function() {
+        const token = this.getToken();
+        if (!token) return true;
+        
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const expiry = payload.exp * 1000; // 转换为毫秒
+            return Date.now() >= expiry;
+        } catch (e) {
+            console.error("解析JWT失败:", e);
+            return true;
+        }
+    },
+
+    checkLoginWithExpiry: function() {
+        const token = this.getToken();
+        if (!token || this.isTokenExpired()) {
+            alert("登录已过期，请重新登录！");
+            localStorage.removeItem("token"); // 清除过期的token
+            window.location.href = "/Home/Index";
+            return false;
+        }
+        return true;
     }
 };

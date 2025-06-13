@@ -1,12 +1,17 @@
-// public class UserLoginDto
-// {
-//     // 移除 [Required] 属性或完全移除 UserName 属性
-//     public string? UserName { get; set; } // 设为可选
+using System.ComponentModel.DataAnnotations;
 
-//     // [Required]
-//     // [EmailAddress]
-//     public string Email { get; set; } = string.Empty;
-
-//     // [Required]
-//     public string Password { get; set; } = string.Empty;
-// }
+namespace MyDotnetApp.DTOs
+{
+    public class UserLoginRequestDto
+    {
+        [Required]
+        public string? UserName { get; set; }
+        
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+        
+        [Required]
+        public string Password { get; set; } = string.Empty;
+    }
+}

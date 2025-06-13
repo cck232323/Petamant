@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyDotnetApp.DTOs;  // 使用 DTOs 命名空间
 using MyDotnetApp.Services;
 using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -18,8 +19,17 @@ namespace MyDotnetApp.Controllers
         {
             _userService = userService;
         }
-
+        
+        /// <summary>
+        /// Registers a new user in the system.
+        /// </summary>
+        /// <param name="registerDto">The user registration data transfer object containing registration information.</param>
+        /// <returns>
+        /// ActionResult containing UserRegisterResponseDto with registration confirmation details if successful;
+        /// BadRequest with validation errors or exception message if registration fails.
+        /// </returns>
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<ActionResult<UserDto>> Register(UserRegisterDto registerDto)
         {
             if (!ModelState.IsValid)
@@ -29,43 +39,54 @@ namespace MyDotnetApp.Controllers
 
             try
             {
-                var user = await _userService.RegisterAsync(registerDto);
-                return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+                var response = await _userService.RegisterAsync(registerDto);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = ex.Message });
             }
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<ActionResult<UserLoginResponseDto>> Login(UserLoginDto loginDto)
         {
+            Console.WriteLine("========== 收到登录请求 ==========");
+            Console.WriteLine($"登录请求数据: Email={loginDto.Email}, Password长度={loginDto.Password?.Length ?? 0}");
+            
             if (!ModelState.IsValid)
             {
+                Console.WriteLine("登录请求验证失败:");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine($"- {error.ErrorMessage}");
+                }
                 return BadRequest(ModelState);
             }
 
             try
             {
+                Console.WriteLine("调用UserService.LoginAsync...");
                 var response = await _userService.LoginAsync(loginDto);
-                // 存储token到cookie或session
-                HttpContext.Response.Cookies.Append("AuthToken", response.Token, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict
-                });
+                Console.WriteLine($"登录成功: UserID={response.Id}, Token长度={response.Token.Length}");
+                Console.WriteLine("========== 登录请求处理完成 ==========");
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                return Unauthorized(ex.Message);
+                Console.WriteLine($"登录失败: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"内部异常: {ex.InnerException.Message}");
+                }
+                Console.WriteLine("========== 登录请求处理失败 ==========");
+                return Unauthorized(new { message = ex.Message });
             }
         }
 
         [HttpGet("{id}")]
-        [Authorize]
+        [Authorize] // 恢复这个特性，因为方法内部逻辑要求用户已登录
         public async Task<ActionResult<UserDto>> GetUser(int id)
         {
             try
@@ -96,7 +117,7 @@ namespace MyDotnetApp.Controllers
                 {
                     return NotFound($"未找到ID为{id}的用户");
                 }
-                
+
                 return Ok(user);
             }
             catch (Exception ex)
@@ -105,6 +126,5 @@ namespace MyDotnetApp.Controllers
                 return StatusCode(500, $"服务器错误: {ex.Message}");
             }
         }
-        
     }
 }

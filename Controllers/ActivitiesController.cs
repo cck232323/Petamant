@@ -11,7 +11,7 @@ namespace MyDotnetApp.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [AllowAnonymous] // 添加这一行，允许匿名访问
     public class ActivitiesController : ControllerBase
     {
         private readonly IActivityService _activityService;

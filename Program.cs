@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization; 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -58,25 +59,53 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 // 添加其他服务...
+// builder.Services.AddAuthorization(options =>
+// {
+//     // 修改为不使用默认策略，而是添加一个命名策略
+//     options.AddPolicy("RequireAuthenticated", policy =>
+//         policy.RequireAuthenticatedUser());
+// });
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+        .Build();
+});
 
 // JWT 认证配置
+// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//     .AddJwtBearer(options =>
+//     {
+//         options.TokenValidationParameters = new TokenValidationParameters
+//         {
+//             ValidateIssuer = true,
+//             ValidateAudience = true,
+//             ValidateLifetime = true,
+//             ValidateIssuerSigningKey = true,
+//             ValidIssuer = builder.Configuration["Jwt:Issuer"],
+//             ValidAudience = builder.Configuration["Jwt:Audience"],
+//             IssuerSigningKey = new SymmetricSecurityKey(
+//                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "defaultkey_for_development_only"))
+//         };
+//     });
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured");
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer is not configured"),
-            ValidAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience is not configured"),
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-            // 设置 NameClaimType 为 ClaimTypes.NameIdentifier
-            NameClaimType = ClaimTypes.NameIdentifier
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                builder.Configuration["Jwt:Key"] ?? "DefaultSecretKeyForDevelopmentOnly12345678901234567890")),
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "default_issuer",
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"] ?? "default_audience",
+            ClockSkew = TimeSpan.Zero
         };
     });
+
+// 在 builder.Services 部分添加
 
 // Console.WriteLine($"Database provider: {builder.Services.BuildServiceProvider().GetService<ApplicationDbContext>()?.Database.ProviderName}");
 
@@ -102,9 +131,32 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "宠物活动聚合社交平台 API v1"));
 }
 
-app.UseStaticFiles();
+// app.UseStaticFiles(); // 确保这行代码在 UseAuthentication 和 UseAuthorization 之前
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // 对于静态文件请求不要求身份验证
+        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=600");
+    }
+});
+app.Use(async (context, next) =>
+{
+    // 如果是静态文件请求，跳过授权检查
+    if (context.Request.Path.StartsWithSegments("/js") || 
+        context.Request.Path.StartsWithSegments("/css") || 
+        context.Request.Path.StartsWithSegments("/lib") || 
+        context.Request.Path.StartsWithSegments("/images"))
+    {
+        context.Items["SkipAuthorization"] = true;
+    }
+    
+    await next();
+});
 app.UseRouting();
 app.UseAuthentication(); // 确保这个在 UseAuthorization 之前
 app.UseAuthorization();

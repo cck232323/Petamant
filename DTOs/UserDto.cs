@@ -16,9 +16,10 @@ namespace MyDotnetApp.DTOs
 
     public class UserLoginDto
     {
-        public required string UserName { get; set; }
+        // public required string UserName { get; set; }
         public string Email { get; set; } = string.Empty;
         public required string Password { get; set; }
+        // public required string UserName { get; internal set; }
     }
 
     public class UserLoginResponseDto
