@@ -1,3 +1,53 @@
+# version: '3.8'
+
+# services:
+#   webapp:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     ports:
+#       - "8081:80"
+#       - "8443:443"
+#     depends_on:
+#       - db
+#     volumes:
+#       - ./https:/https:ro  # 👈 把本地的证书文件夹挂载进去，只读
+#       - ./keys:/root/.aspnet/DataProtection-Keys
+#     environment:
+#       - ASPNETCORE_ENVIRONMENT=Production
+#       - ConnectionStrings__DefaultConnection=Host=db;Database=petactivities;Username=postgres;Password=postgres
+#       - JWT_KEY=your_secure_key_at_least_32_characters_long
+#       - JWT_ISSUER=petamant
+#       - JWT_AUDIENCE=petamant-clients
+#       - JWT_EXPIRY_MINUTES=60
+#       - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:8081
+#       - ASPNETCORE_URLS=https://+:443;http://+:80
+#       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+#       - ASPNETCORE_Kestrel__Certificates__Default__Password=Aq@112211
+#     command: ["/app/wait-for-it.sh", "db:5432", "--", "dotnet", "MyDotnetApp.dll"]
+#     # volumes:
+#     #   - ./https:/https:ro  # 👈 把本地的证书文件夹挂载进去，只读
+#     #   - ./keys:/root/.aspnet/DataProtection-Keys
+#   db:
+#     image: postgres:latest
+#     environment:
+#       - POSTGRES_USER=postgres
+#       - POSTGRES_PASSWORD=postgres
+#       - POSTGRES_DB=petactivities
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - postgres-data:/var/lib/postgresql/data
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 5
+
+# volumes:
+#   postgres-data:
+#   keys-volume:
+
 version: '3.8'
 
 services:
@@ -6,23 +56,50 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
+      - "8081:80"
+      - "8443:443"
     depends_on:
-      - db
+      db:
+        condition: service_healthy  # 确保数据库健康后再启动webapp
+    networks:
+      - petamant-network  # 添加到同一网络
+    volumes:
+      - ./https:/https:ro
+      - ./keys:/root/.aspnet/DataProtection-Keys
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Host=db;Database=petactivities;Username=postgres;Password=postgres
+      - JWT_KEY=your_secure_key_at_least_32_characters_long
+      - JWT_ISSUER=petamant
+      - JWT_AUDIENCE=petamant-clients
+      - JWT_EXPIRY_MINUTES=60
+      - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:8081
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=Aq@112211
+    command: ["dotnet", "MyDotnetApp.dll"]  # 简化命令，依赖于depends_on条件
 
   db:
-    image: postgres:14
+    image: postgres:14  # 指定版本14，与之前的数据兼容
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=petactivities
     ports:
       - "5432:5432"
+    networks:
+      - petamant-network  # 添加到同一网络
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s  # 给数据库启动的时间
+
+networks:
+  petamant-network:  # 定义网络
 
 volumes:
   postgres-data:

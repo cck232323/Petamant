@@ -121,9 +121,9 @@ This will start both the web application and PostgreSQL database.
 Or build and run just the application container:
 bash
 docker build -t pet-activity-platform .
-docker run -p 8080:80 pet-activity-platform
+docker run -p 8081:80 pet-activity-platform
 3.
-Access the application at http://localhost:8080
+Access the application at http://localhost:8081
 Contributing
 1.
 Fork the repository
