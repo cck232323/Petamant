@@ -207,8 +207,8 @@ namespace MyDotnetApp.Services
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim("nameid", user.Id.ToString()), // 添加简单的nameid声明
-                    new Claim("sub", user.Id.ToString())     // 添加sub声明
+                    // new Claim("nameid", user.Id.ToString()), // 添加简单的nameid声明
+                    // new Claim("sub", user.Id.ToString())     // 添加sub声明
                 };
                 
                 // 创建密钥
