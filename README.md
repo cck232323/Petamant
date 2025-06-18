@@ -1,40 +1,30 @@
-# Pet Activity Social Platform
-
+Pet Activity Social Platform
 A comprehensive web application for pet owners to create, discover, and join pet-related activities and events.
-
-## Overview
-
+Overview
 Pet Activity Social Platform is a .NET 8.0 web application that allows users to create accounts, organize pet activities, register for events, and build a community of pet enthusiasts. The platform provides an intuitive interface for managing activities and connecting with other pet owners.
-
-## Features
-
-- **User Authentication**: Secure JWT-based authentication system
-- **Activity Management**: Create, view, update, and delete pet activities
-- **Registration System**: Register for activities with pet information
-- **User Profiles**: View user profiles and their created activities
-- **Responsive Design**: Mobile-friendly interface using Bootstrap 4
-
-## Technology Stack
-
-- **Backend**:
-  - ASP.NET Core 8.0
-  - Entity Framework Core 8.0
-  - PostgreSQL Database
-  - JWT Authentication
-
-- **Frontend**:
-  - Razor Views
-  - JavaScript/jQuery
-  - Bootstrap 4
-  - AJAX for asynchronous operations
-
-- **Tools & Libraries**:
-  - AutoMapper for object mapping
-  - FluentValidation for input validation
-  - Swagger for API documentation
-  - BCrypt for password hashing
-
-## Project Structure
+Features
+User Authentication: Secure JWT-based authentication system
+Activity Management: Create, view, update, and delete pet activities
+Registration System: Register for activities with pet information
+User Profiles: View user profiles and their created activities
+Responsive Design: Mobile-friendly interface using Bootstrap 4
+Technology Stack
+Backend:
+ASP.NET Core 8.0
+Entity Framework Core 8.0
+PostgreSQL Database
+JWT Authentication
+Frontend:
+Razor Views
+JavaScript/jQuery
+Bootstrap 4
+AJAX for asynchronous operations
+Tools & Libraries:
+AutoMapper for object mapping
+FluentValidation for input validation
+Swagger for API documentation
+BCrypt for password hashing
+Project Structure
 MyDotnetApp/
 ├── Controllers/           # API and MVC controllers
 ├── Models/                # Domain models
@@ -52,22 +42,18 @@ MyDotnetApp/
 ├── Dockerfile             # Docker configuration
 ├── docker-compose.yml     # Docker Compose configuration
 └── Program.cs             # Application entry point and configuration
-
-## Getting Started
-
-### Prerequisites
-
-- .NET 8.0 SDK
-- PostgreSQL database
-- Visual Studio 2022 or Visual Studio Code
-- Docker (optional, for containerized deployment)
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/MyDotnetApp.git
-   cd MyDotnetApp
+Getting Started
+Prerequisites
+.NET 8.0 SDK
+PostgreSQL database
+Visual Studio 2022 or Visual Studio Code
+Docker (optional, for containerized deployment)
+Installation
+1.
+Clone the repository:
+bash
+git clone https://github.com/yourusername/MyDotnetApp.git
+cd MyDotnetApp
 2.
 Update the database connection string in appsettings.json:
 "ConnectionStrings": {
@@ -140,4 +126,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 Acknowledgments
 Bootstrap team for the responsive UI framework
 ASP.NET Core team for the excellent web framework
-All contributors who have helped improve this project
+All contributors who have helped improve this

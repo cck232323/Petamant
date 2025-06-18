@@ -16,9 +16,11 @@ builder.Configuration
 // 添加在 DotEnv.Load() 和 Configuration 初始化之后：
 // builder.Configuration["ConnectionStrings:DefaultConnection"] = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING");
 // 如果使用 Docker Compose，取消注释以下行并设置环境变量
+// 检测运行环境并设置适当的连接字符串
+string dbHost = Environment.GetEnvironmentVariable("RUNNING_IN_DOCKER") == "true" ? "db" : "localhost";
 builder.Configuration["ConnectionStrings:DefaultConnection"] =
     Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") 
-    ?? "Host=db;Database=petactivities;Username=postgres;Password=postgres";
+    ?? $"Host={dbHost};Database=petactivities;Username=postgres;Password=postgres";
 builder.Configuration["Jwt:Key"] = Environment.GetEnvironmentVariable("JWT_KEY");
 builder.Configuration["Jwt:Issuer"] = Environment.GetEnvironmentVariable("JWT_ISSUER");
 builder.Configuration["Jwt:Audience"] = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
@@ -95,14 +97,36 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // 添加AutoMapper
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
+// 根据环境选择数据保护密钥存储路径
+if (Environment.GetEnvironmentVariable("RUNNING_IN_DOCKER") == "true")
+{
+    // Docker 环境 - 使用容器内的路径
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
+        .SetApplicationName("PetamantApp");
+}
+else
+{
+    // 本地开发环境 - 使用用户目录
+    var keyDirectory = new DirectoryInfo(
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), 
+                    ".aspnet", "DataProtection-Keys"));
+    
+    // 确保目录存在
+    if (!keyDirectory.Exists)
+    {
+        keyDirectory.Create();
+    }
+    
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(keyDirectory)
+        .SetApplicationName("PetamantApp");
+}
 
 // 添加服务
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 // 添加其他服务...
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/app/keys"))  // 改为容器内可写的目录
-    .SetApplicationName("PetamantApp");
 
 // 配置JWT认证
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

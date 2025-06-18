@@ -50,5 +50,5 @@ COPY --from=publish /app/publish .
 # 创建目录并设置权限
 RUN mkdir -p /root/.aspnet/DataProtection-Keys && \
     chmod 777 /root/.aspnet/DataProtection-Keys
-
+ENV RUNNING_IN_DOCKER=true
 ENTRYPOINT ["dotnet", "MyDotnetApp.dll"]
