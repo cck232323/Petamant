@@ -89,7 +89,7 @@ MyDotnetApp/
    ```bash
    dotnet run
    ```
-5. Access the application at [https://localhost:5001](https://localhost:5001) or [http://localhost:5000](http://localhost:5000)
+5. Access the application at [https://localhost:5001] or [http://localhost:5000]
 
 ## API Documentation
 
@@ -153,10 +153,7 @@ The project includes Docker configuration for easy containerized deployment:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Bootstrap team for the responsive UI framework
-- ASP.NET Core team for the excellent web framework
-- All contributors who have helped improve this
-
+Acknowledgments
+Bootstrap team for the responsive UI framework
+ASP.NET Core team for the excellent web framework
+All contributors who have helped improve this
