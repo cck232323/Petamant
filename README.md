@@ -1,57 +1,45 @@
-Pet Activity Social Platform
+# Pet Activity Social Platform
 
 A comprehensive web application for pet owners to create, discover, and join pet-related activities and events.
 
-Overview
+## Overview
 
 Pet Activity Social Platform is a .NET 8.0 web application that allows users to create accounts, organize pet activities, register for events, and build a community of pet enthusiasts. The platform provides an intuitive interface for managing activities and connecting with other pet owners.
 
-Features
+## Features
 
-User Authentication: Secure JWT-based authentication system
+- User Authentication: Secure JWT-based authentication system
+- Activity Management: Create, view, update, and delete pet activities
+- Registration System: Register for activities with pet information
+- User Profiles: View user profiles and their created activities
+- Responsive Design: Mobile-friendly interface using Bootstrap 4
 
-Activity Management: Create, view, update, and delete pet activities
+## Technology Stack
 
-Registration System: Register for activities with pet information
+**Backend:**
 
-User Profiles: View user profiles and their created activities
+- ASP.NET Core 8.0
+- Entity Framework Core 8.0
+- PostgreSQL Database
+- JWT Authentication
 
-Responsive Design: Mobile-friendly interface using Bootstrap 4
+**Frontend:**
 
-Technology Stack
+- Razor Views
+- JavaScript/jQuery
+- Bootstrap 4
+- AJAX for asynchronous operations
 
-Backend:
+**Tools & Libraries:**
 
-ASP.NET Core 8.0
+- AutoMapper for object mapping
+- FluentValidation for input validation
+- Swagger for API documentation
+- BCrypt for password hashing
 
-Entity Framework Core 8.0
+## Project Structure
 
-PostgreSQL Database
-
-JWT Authentication
-
-Frontend:
-
-Razor Views
-
-JavaScript/jQuery
-
-Bootstrap 4
-
-AJAX for asynchronous operations
-
-Tools & Libraries:
-
-AutoMapper for object mapping
-
-FluentValidation for input validation
-
-Swagger for API documentation
-
-BCrypt for password hashing
-
-Project Structure
-
+```
 MyDotnetApp/
 ├── Controllers/           # API and MVC controllers
 ├── Models/                # Domain models
@@ -69,121 +57,105 @@ MyDotnetApp/
 ├── Dockerfile             # Docker configuration
 ├── docker-compose.yml     # Docker Compose configuration
 └── Program.cs             # Application entry point and configuration
+```
 
-Getting Started
+## Getting Started
 
-Prerequisites
+### Prerequisites
 
-.NET 8.0 SDK
+- .NET 8.0 SDK
+- PostgreSQL database
+- Visual Studio 2022 or Visual Studio Code
+- Docker (optional, for containerized deployment)
 
-PostgreSQL database
+### Installation
 
-Visual Studio 2022 or Visual Studio Code
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/MyDotnetApp.git
+   cd MyDotnetApp
+   ```
+2. Update the database connection string in appsettings.json:
+   ```json
+   "ConnectionStrings": {
+     "DefaultConnection": "Host=localhost;Database=petactivities;Username=youruser;Password=yourpassword"
+   }
+   ```
+3. Apply database migrations:
+   ```bash
+   dotnet ef database update
+   ```
+4. Run the application:
+   ```bash
+   dotnet run
+   ```
+5. Access the application at [https://localhost:5001](https://localhost:5001) or [http://localhost:5000](http://localhost:5000)
 
-Docker (optional, for containerized deployment)
-
-Installation
-
-Clone the repository:
-
-git clone https://github.com/yourusername/MyDotnetApp.git
-cd MyDotnetApp
-
-Update the database connection string in appsettings.json:
-
-"ConnectionStrings": {
-  "DefaultConnection": "Host=localhost;Database=petactivities;Username=youruser;Password=yourpassword"
-}
-
-Apply database migrations:
-
-dotnet ef database update
-
-Run the application:
-
-dotnet run
-
-Access the application at https://localhost:5001 or http://localhost:5000
-
-API Documentation
+## API Documentation
 
 The API documentation is available via Swagger UI at /swagger when running the application in development mode.
 
-Key API Endpoints
+### Key API Endpoints
 
-GET /api/activities - Get all activities
+- GET /api/activities - Get all activities
+- GET /api/activities/{id} - Get activity details
+- POST /api/activities - Create a new activity
+- DELETE /api/activities/{id} - Delete an activity
+- POST /api/registrations - Register for an activity
+- GET /api/activities/user/{id}/created - Get activities created by a user
+- GET /api/activities/user/{id}/registered - Get activities a user has registered for
 
-GET /api/activities/{id} - Get activity details
-
-POST /api/activities - Create a new activity
-
-DELETE /api/activities/{id} - Delete an activity
-
-POST /api/registrations - Register for an activity
-
-GET /api/activities/user/{id}/created - Get activities created by a user
-
-GET /api/activities/user/{id}/registered - Get activities a user has registered for
-
-Authentication
+## Authentication
 
 The application uses JWT (JSON Web Tokens) for authentication. To access protected endpoints:
 
-Register a new user account or login with existing credentials
+1. Register a new user account or login with existing credentials
+2. Use the returned token in the Authorization header for subsequent requests:
+   ```
+   Authorization: Bearer {your_token}
+   ```
 
-Use the returned token in the Authorization header for subsequent requests:
+## Deployment
 
-Authorization: Bearer {your_token}
+### Hosting on IIS
 
-Deployment
+1. Publish the application:
+   ```bash
+   dotnet publish -c Release
+   ```
+2. Deploy the published files to your IIS server
+3. Configure the application pool to use .NET Core hosting
 
-Hosting on IIS
-
-Publish the application:
-
-dotnet publish -c Release
-
-Deploy the published files to your IIS server
-
-Configure the application pool to use .NET Core hosting
-
-Docker Deployment
+### Docker Deployment
 
 The project includes Docker configuration for easy containerized deployment:
 
-Build and run using Docker Compose (recommended):
+1. Build and run using Docker Compose (recommended):
+   ```bash
+   docker-compose up -d
+   ```
+   This will start both the web application and PostgreSQL database.
+2. Or build and run just the application container:
+   ```bash
+   docker build -t pet-activity-platform .
+   docker run -p 8081:80 pet-activity-platform
+   ```
+3. Access the application at [http://localhost:8081](http://localhost:8081)
 
-docker-compose up -d
+## Contributing
 
-This will start both the web application and PostgreSQL database.
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature-name`
+3. Commit your changes: `git commit -m 'Add some feature'`
+4. Push to the branch: `git push origin feature/your-feature-name`
+5. Submit a pull request
 
-Or build and run just the application container:
-
-docker build -t pet-activity-platform .
-docker run -p 8081:80 pet-activity-platform
-
-Access the application at http://localhost:8081
-
-Contributing
-
-Fork the repository
-
-Create a feature branch: git checkout -b feature/your-feature-name
-
-Commit your changes: git commit -m 'Add some feature'
-
-Push to the branch: git push origin feature/your-feature-name
-
-Submit a pull request
-
-License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-Acknowledgments
+## Acknowledgments
 
-Bootstrap team for the responsive UI framework
-
-ASP.NET Core team for the excellent web framework
-
-All contributors who have helped improve this
+- Bootstrap team for the responsive UI framework
+- ASP.NET Core team for the excellent web framework
+- All contributors who have helped improve this
