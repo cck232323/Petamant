@@ -41,6 +41,9 @@ namespace MyDotnetApp.Services
             var activity = await _context.Activities
                 .Include(a => a.CreatorUser)
                 .Include(a => a.Registrations)
+                .ThenInclude(r => r.User)
+                .Include(a => a.Comments)
+                    .ThenInclude(c => c.User)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (activity == null)
@@ -97,7 +100,7 @@ namespace MyDotnetApp.Services
 
             return _mapper.Map<IEnumerable<RegistrationDto>>(registrations);
         }
-
+        
         public async Task<IEnumerable<ActivityDto>> GetUserCreatedActivitiesAsync(int userId)
         {
             var activities = await _context.Activities
@@ -119,7 +122,7 @@ namespace MyDotnetApp.Services
 
             return _mapper.Map<IEnumerable<ActivityDto>>(activities);
         }
-
+        
         public async Task DeleteActivityAsync(int id, int userId)
         {
             var activity = await _context.Activities

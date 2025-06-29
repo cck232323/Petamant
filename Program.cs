@@ -126,6 +126,8 @@ else
 // 添加服务
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
+// builder.Services.AddScoped<ICommentService, ICommentService>();
+
 // 添加其他服务...
 
 // 配置JWT认证

@@ -18,6 +18,8 @@ namespace MyDotnetApp.DTOs
         public int RegistrationsCount { get; set; }
         public List<RegistrationDto>? Registrations { get; set; }
         public UserDto Creator { get; set; } = null!;
+        // public List<CommentDto>? Comments { get; set; } = new List<CommentDto>();
+        public ICollection<CommentDto> Comments { get; set; } = new List<CommentDto>();
     }
 
     // public class ActivityCreateDto

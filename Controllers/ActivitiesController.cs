@@ -6,19 +6,30 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-
+using MyDotnetApp.Data;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 namespace MyDotnetApp.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     [AllowAnonymous] // 添加这一行，允许匿名访问
+  
     public class ActivitiesController : ControllerBase
     {
+        private readonly ApplicationDbContext _context;
+
+        // public CommentsController(ApplicationDbContext context)
+        // {
+        //     _context = context;
+        // }
         private readonly IActivityService _activityService;
 
-        public ActivitiesController(IActivityService activityService)
+        public ActivitiesController(IActivityService activityService, ApplicationDbContext context)
         {
             _activityService = activityService;
+            _context = context;
+            // _context = activityService.GetDbContext(); // 获取 ApplicationDbContext 实例
         }
 
         [HttpGet]
@@ -77,7 +88,30 @@ namespace MyDotnetApp.Controllers
                 return NotFound(ex.Message);
             }
         }
+        // 在ActivitiesController.cs中添加
+        [HttpGet("{id}/comments")]
+        public async Task<ActionResult<IEnumerable<CommentDto>>> GetActivityComments(int activityId)
+        {
+            var comments = await _context.Comments
+                .Where(c => c.ActivityId == activityId)
+                // .Include(c => c.User)
+                // .Where(c => c.ActivityId == activityId)
+                // .Include(c => c.User)
+                .OrderByDescending(c => c.CreatedAt)
+                .Select(c => new CommentDto
+                {
+                    Id = c.Id,
+                    Content = c.Content,
+                    CreatedAt = c.CreatedAt,
+                    UserId = c.UserId,
+                    UserName = c.User.UserName,
+                    ActivityId = c.ActivityId
+                })
+                .ToListAsync();
 
+
+            return Ok(comments);
+        }
         [HttpGet("user/{userId}/created")]
         public async Task<ActionResult<IEnumerable<ActivityDto>>> GetUserCreatedActivities(int userId)
         {
