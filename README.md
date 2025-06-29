@@ -72,7 +72,7 @@ MyDotnetApp/
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/MyDotnetApp.git
+   git clone https://github.com/cck232323/Petamant
    cd MyDotnetApp
    ```
 2. Update the database connection string in appsettings.json:
