@@ -90,13 +90,14 @@ namespace MyDotnetApp.Controllers
         }
         // 在ActivitiesController.cs中添加
         [HttpGet("{id}/comments")]
-        public async Task<ActionResult<IEnumerable<CommentDto>>> GetActivityComments(int activityId)
+        public async Task<ActionResult<IEnumerable<CommentDto>>> GetActivityComments(int id)
         {
+            // 只获取顶层评论
             var comments = await _context.Comments
-                .Where(c => c.ActivityId == activityId)
-                // .Include(c => c.User)
-                // .Where(c => c.ActivityId == activityId)
-                // .Include(c => c.User)
+                .Where(c => c.ActivityId == id && c.ParentCommentId == null)
+                .Include(c => c.User)
+                .Include(c => c.Replies)
+                    .ThenInclude(r => r.User)
                 .OrderByDescending(c => c.CreatedAt)
                 .Select(c => new CommentDto
                 {
@@ -105,10 +106,21 @@ namespace MyDotnetApp.Controllers
                     CreatedAt = c.CreatedAt,
                     UserId = c.UserId,
                     UserName = c.User.UserName,
-                    ActivityId = c.ActivityId
+                    ActivityId = c.ActivityId,
+                    Replies = c.Replies.Select(r => new CommentDto
+                    {
+                        Id = r.Id,
+                        Content = r.Content,
+                        CreatedAt = r.CreatedAt,
+                        UserId = r.UserId,
+                        UserName = r.User.UserName,
+                        ActivityId = r.ActivityId,
+                        ParentCommentId = r.ParentCommentId,
+                        ReplyToUserId = r.ReplyToUserId,
+                        ReplyToUserName = r.ReplyToUserName
+                    }).OrderBy(r => r.CreatedAt).ToList()
                 })
                 .ToListAsync();
-
 
             return Ok(comments);
         }

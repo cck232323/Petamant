@@ -33,7 +33,8 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0.410 AS build
 WORKDIR /src
 COPY ["MyDotnetApp.csproj", "./"]
 RUN dotnet restore "MyDotnetApp.csproj"

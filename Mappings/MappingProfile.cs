@@ -29,7 +29,8 @@ namespace MyDotnetApp.Mappings
             CreateMap<Comment, CommentDto>()
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.Replies, opt => opt.MapFrom(src => src.Replies.Where(r => r.ParentCommentId == src.Id)));
                 // .ForMember(dest => dest.ActivityId, opt => opt.MapFrom(src => src.ActivityId));
                 // .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
                 // .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))

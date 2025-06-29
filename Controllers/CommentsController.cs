@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyDotnetApp.DTOs;
-
-using Microsoft.EntityFrameworkCore; // 添加这一行
+using Microsoft.EntityFrameworkCore;
 using MyDotnetApp.Data;
-
 using MyDotnetApp.Models;
 using System.Security.Claims;
+using MyDotnetApp.Services;
 
 namespace MyDotnetApp.Controllers
 {
@@ -15,26 +14,33 @@ namespace MyDotnetApp.Controllers
     // [AllowAnonymous]
     public class CommentsController : ControllerBase
     {
-        // private readonly ICommentsService _commentService;
+        private readonly ICommentService _commentService;
+        private readonly ApplicationDbContext _context; // 添加 _context 字段
 
-        // public CommentsController(ICommentsService commentService)
-        // {
-        //     _commentService = commentService;
-        // }
-        private readonly ApplicationDbContext _context;
-
-        public CommentsController(ApplicationDbContext context)
+        public CommentsController(ICommentService commentService, ApplicationDbContext context)
         {
-            _context = context;
-            // _context = context;
+            _commentService = commentService;
+            _context = context; // 初始化 _context
+        }
+
+        [HttpGet("activity/{activityId}")]
+        public async Task<ActionResult<IEnumerable<CommentDto>>> GetActivityComments(int activityId)
+        {
+            var comments = await _commentService.GetActivityCommentsAsync(activityId);
+            return Ok(comments);
         }
 
         [HttpPost]
         [Authorize]
-        [HttpGet("sql")]
-        // [AllowAnonymous] // 允许匿名访问
-        public async Task<ActionResult> CreateActivityComment(CommentCreateDto commentDto)
+        public async Task<ActionResult<CommentDto>> CreateComment(CommentCreateDto commentDto)
+        {
+            var comment = await _commentService.CreateCommentAsync(commentDto);
+            return CreatedAtAction(nameof(GetActivityComments), new { activityId = comment.ActivityId }, comment);
+        }
 
+        [HttpPost("sql")] // 修改为 HttpPost，因为这是创建操作
+        [Authorize]
+        public async Task<ActionResult> CreateActivityCommentLegacy(CommentCreateDto commentDto)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
             Console.WriteLine("User ID: " + userId);
@@ -50,26 +56,21 @@ namespace MyDotnetApp.Controllers
                 return NotFound("活动不存在");
             }
 
-            // var activity = await _context.Comments.CreateActivityComment(CommentCreateDto.ActivityId);
-            // var UserName = await _context.Users
-            //     .FromSqlRaw("SELECT UserName FROM \"Users\"")
-            //     .ToListAsync();
             var comment = new Comment
             {
                 Content = commentDto.Content,
                 UserId = userId,
                 ActivityId = commentDto.ActivityId,
-                UserName = commentDto.UserName // 假设 CommentCreateDto 包含 UserName 字段
-
+                UserName = commentDto.UserName,
+                // 添加对楼中楼功能的支持
+                ParentCommentId = commentDto.ParentCommentId,
+                ReplyToUserId = commentDto.ReplyToUserId,
+                ReplyToUserName = commentDto.ReplyToUserName
             };
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "评论成功" });
-            // if (activity == null)
-            // {
-            //     return NotFound("活动不存在");
-            // }
         }
     }
 }

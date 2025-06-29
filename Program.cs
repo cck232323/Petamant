@@ -127,6 +127,8 @@ else
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 // builder.Services.AddScoped<ICommentService, ICommentService>();
+// 在 Program.cs 中
+builder.Services.AddScoped<ICommentService, CommentService>();
 
 // 添加其他服务...
 
